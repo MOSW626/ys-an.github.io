@@ -52,7 +52,7 @@ export const fetchGitHubRepos = async (username = 'MOSW626') => {
                 isPython: fileNames.includes('requirements.txt') || fileNames.includes('setup.py') || fileNames.includes('pyproject.toml'),
                 isRust: fileNames.includes('cargo.toml') || fileNames.includes('cargo.lock'),
                 isCpp: fileNames.includes('cmakelists.txt') || fileNames.includes('makefile') || fileNames.includes('.cpp'),
-                isRos: fileNames.includes('package.xml') || fileNames.includes('setup.py') && fileNames.some(f => f.includes('ros')),
+                isRos: fileNames.includes('package.xml') || (fileNames.includes('setup.py') && fileNames.some(f => f.includes('ros'))),
                 isAndroid: fileNames.includes('build.gradle') || fileNames.includes('androidmanifest.xml'),
                 isJupyter: fileNames.some(f => f.endsWith('.ipynb')),
                 hasDocker: fileNames.includes('dockerfile') || fileNames.includes('docker-compose.yml'),
