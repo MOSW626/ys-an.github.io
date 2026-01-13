@@ -1,0 +1,110 @@
+.project-modal .modal-content {
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.project-modal-header {
+  background: #1e293b;
+  color: white;
+  border: none;
+  padding: 20px 30px;
+}
+
+.project-modal-header .modal-title {
+  color: white;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  color: white;
+  opacity: 0.8;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  opacity: 1;
+  color: white;
+}
+
+.project-modal-body {
+  padding: 30px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.project-image {
+  border-radius: 10px;
+  max-height: 400px;
+  object-fit: contain;
+  background: #f8f9fa;
+}
+
+.project-info {
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px 0;
+}
+
+.project-description h5,
+.project-achievements h5,
+.project-files h5 {
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.project-achievements ul {
+  list-style: none;
+  padding: 0;
+}
+
+.project-achievements li {
+  padding: 8px 0;
+  padding-left: 25px;
+  position: relative;
+  color: #475569;
+}
+
+.project-achievements li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #2563eb;
+  font-weight: bold;
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.file-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #1e293b;
+  transition: all 0.3s ease;
+}
+
+.file-link:hover {
+  background: #e2e8f0;
+  color: #2563eb;
+}
+
+.project-links {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+  margin-top: 20px;
+}
+

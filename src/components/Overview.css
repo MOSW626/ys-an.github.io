@@ -1,0 +1,91 @@
+.overview-section {
+  background: #ffffff;
+}
+
+.overview-about-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.overview-about-card h3 {
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+.overview-about-card p {
+  color: #475569;
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+.overview-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.stat-item {
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.overview-card {
+  height: 100%;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.overview-card:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+  transform: translateY(-2px);
+}
+
+.overview-icon {
+  font-size: 1.5rem;
+  color: #2563eb;
+}
+
+.overview-projects {
+  min-height: 150px;
+}
+
+.overview-project-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.overview-project-item:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 991px) {
+  .overview-stats {
+    flex-direction: row;
+    justify-content: space-around;
+    margin-top: 20px;
+  }
+
+  .stat-item {
+    flex: 1;
+  }
+}
+
