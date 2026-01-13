@@ -38,19 +38,34 @@ export const fetchGitHubRepos = async (username = 'MOSW626') => {
             });
             if (readmeResponse.ok) {
               const readmeData = await readmeResponse.json();
-              // Base64 디코딩
-              const decoded = atob(readmeData.content.replace(/\s/g, ''));
-              // Markdown 제거 및 텍스트만 추출
-              const textOnly = decoded
-                .replace(/#{1,6}\s+/g, '') // 헤더 제거
-                .replace(/\*\*([^*]+)\*\*/g, '$1') // 볼드 제거
-                .replace(/\*([^*]+)\*/g, '$1') // 이탤릭 제거
-                .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // 링크 제거
-                .replace(/```[\s\S]*?```/g, '') // 코드 블록 제거
-                .replace(/`([^`]+)`/g, '$1') // 인라인 코드 제거
-                .replace(/\n{3,}/g, '\n\n') // 여러 줄바꿈 정리
-                .trim();
-              readme = textOnly.substring(0, 200); // 처음 200자만
+              try {
+                // Base64 디코딩 (한글 인코딩 문제 해결)
+                const base64Content = readmeData.content.replace(/\s/g, '');
+                const binaryString = atob(base64Content);
+                // UTF-8 바이트를 문자열로 변환
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                  bytes[i] = binaryString.charCodeAt(i);
+                }
+                const decoded = new TextDecoder('utf-8').decode(bytes);
+                
+                // Markdown 제거 및 텍스트만 추출
+                const textOnly = decoded
+                  .replace(/#{1,6}\s+/g, '') // 헤더 제거
+                  .replace(/\*\*([^*]+)\*\*/g, '$1') // 볼드 제거
+                  .replace(/\*([^*]+)\*/g, '$1') // 이탤릭 제거
+                  .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // 링크 제거
+                  .replace(/```[\s\S]*?```/g, '') // 코드 블록 제거
+                  .replace(/`([^`]+)`/g, '$1') // 인라인 코드 제거
+                  .replace(/!\[([^\]]*)\]\([^\)]+\)/g, '') // 이미지 제거
+                  .replace(/\n{3,}/g, '\n\n') // 여러 줄바꿈 정리
+                  .replace(/[^\w\s가-힣ㄱ-ㅎㅏ-ㅣ.,!?;:()\-]/g, ' ') // 특수문자 정리
+                  .trim();
+                readme = textOnly.substring(0, 200); // 처음 200자만
+              } catch (decodeError) {
+                console.warn(`README 디코딩 실패: ${repo.name}`, decodeError);
+                readme = null;
+              }
             }
           } catch (e) {
             // README가 없으면 무시

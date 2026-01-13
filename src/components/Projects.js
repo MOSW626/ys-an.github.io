@@ -273,16 +273,22 @@ const Projects = () => {
                                   <Card.Title className="h5 mb-0">{repo.title}</Card.Title>
                                   <FaGithub size={20} className="text-muted" />
                                 </div>
-                                <Card.Text className="mb-3" style={{
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  display: '-webkit-box',
-                                  WebkitLineClamp: 3,
-                                  WebkitBoxOrient: 'vertical',
-                                  minHeight: '60px'
-                                }}>
-                                  {repo.description && repo.description.length > 0
-                                    ? repo.description
+                                <Card.Text 
+                                  className="mb-3" 
+                                  style={{ 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 3,
+                                    WebkitBoxOrient: 'vertical',
+                                    minHeight: '60px',
+                                    wordBreak: 'break-word'
+                                  }}
+                                >
+                                  {repo.description && repo.description.length > 0 && !repo.description.includes('')
+                                    ? repo.description 
+                                    : repo.description && repo.description.length > 0 && repo.description.includes('')
+                                    ? '설명을 불러올 수 없습니다. GitHub에서 직접 확인해주세요.'
                                     : '설명이 없습니다.'}
                                 </Card.Text>
                                 <div className="mb-3">
