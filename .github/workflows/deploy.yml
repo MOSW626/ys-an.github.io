@@ -38,4 +38,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
           cname: false
+          force_orphan: false
+          enable_jekyll: false
 
