@@ -48,7 +48,7 @@ npm run build
 ### 배포 설정
 1. `package.json`의 `homepage` 필드를 확인하세요:
    ```json
-   "homepage": "https://mosw626.github.io/ys-an.github.io"
+   "homepage": "https://mosw626.github.io/ysan.github.io"
    ```
 
 2. 배포 실행:

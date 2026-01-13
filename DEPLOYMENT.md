@@ -62,7 +62,7 @@
 ### package.json homepage 설정
 `package.json`의 `homepage` 필드가 올바른지 확인하세요:
 ```json
-"homepage": "https://mosw626.github.io/ys-an.github.io"
+"homepage": "https://mosw626.github.io/ysan.github.io"
 ```
 
 ### 파일 경로
