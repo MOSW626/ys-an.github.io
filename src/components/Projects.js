@@ -285,10 +285,8 @@ const Projects = () => {
                                     wordBreak: 'break-word'
                                   }}
                                 >
-                                  {repo.description && repo.description.length > 0 && !repo.description.includes('')
+                                  {repo.description && repo.description.length > 0 
                                     ? repo.description 
-                                    : repo.description && repo.description.length > 0 && repo.description.includes('')
-                                    ? '설명을 불러올 수 없습니다. GitHub에서 직접 확인해주세요.'
                                     : '설명이 없습니다.'}
                                 </Card.Text>
                                 <div className="mb-3">

@@ -48,7 +48,7 @@ export const fetchGitHubRepos = async (username = 'MOSW626') => {
                   bytes[i] = binaryString.charCodeAt(i);
                 }
                 const decoded = new TextDecoder('utf-8').decode(bytes);
-                
+
                 // Markdown 제거 및 텍스트만 추출
                 const textOnly = decoded
                   .replace(/#{1,6}\s+/g, '') // 헤더 제거
@@ -59,7 +59,6 @@ export const fetchGitHubRepos = async (username = 'MOSW626') => {
                   .replace(/`([^`]+)`/g, '$1') // 인라인 코드 제거
                   .replace(/!\[([^\]]*)\]\([^\)]+\)/g, '') // 이미지 제거
                   .replace(/\n{3,}/g, '\n\n') // 여러 줄바꿈 정리
-                  .replace(/[^\w\s가-힣ㄱ-ㅎㅏ-ㅣ.,!?;:()\-]/g, ' ') // 특수문자 정리
                   .trim();
                 readme = textOnly.substring(0, 200); // 처음 200자만
               } catch (decodeError) {
@@ -75,11 +74,36 @@ export const fetchGitHubRepos = async (username = 'MOSW626') => {
 
         // 설명 정리: description이 없거나 너무 짧으면 README 사용
         let finalDescription = repo.description;
+        
+        // 깨진 텍스트 감지 (이상한 문자 패턴)
+        const isCorrupted = (text) => {
+          if (!text || text.length < 5) return false;
+          // 깨진 한글 패턴 감지 (예: ì, í, ë 같은 문자)
+          const corruptedPattern = /[ìíîïðñóôõöùúûüýþÿ]/;
+          // 깨진 텍스트 비율 확인 (이상한 문자가 너무 많으면 깨진 것으로 판단)
+          const corruptedChars = text.match(/[ìíîïðñóôõöùúûüýþÿ]/g);
+          if (corruptedChars && corruptedChars.length > text.length * 0.2) {
+            return true;
+          }
+          return corruptedPattern.test(text) && corruptedChars && corruptedChars.length > 3;
+        };
+        
+        // description이 없거나 깨져있으면 README 사용
         if (!finalDescription || finalDescription.length < 10) {
-          finalDescription = readme;
+          if (readme && readme.length > 10 && !isCorrupted(readme)) {
+            finalDescription = readme;
+          }
+        } else if (isCorrupted(finalDescription)) {
+          // description이 깨져있으면 README 시도
+          if (readme && readme.length > 10 && !isCorrupted(readme)) {
+            finalDescription = readme;
+          }
+          // README도 깨져있으면 원본 description 유지 (최소한 뭔가 보여줌)
         }
-        if (!finalDescription || finalDescription.length < 10) {
-          finalDescription = '설명이 없습니다.';
+        
+        // 최종적으로 설명이 없으면 기본 메시지
+        if (!finalDescription || finalDescription.length < 5) {
+          finalDescription = repo.description || '설명이 없습니다.';
         }
 
         return {
