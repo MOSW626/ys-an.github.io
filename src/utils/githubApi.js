@@ -24,63 +24,59 @@ export const fetchGitHubRepos = async (username = 'MOSW626') => {
 
     console.log(`GitHub 저장소 ${repos.length}개를 찾았습니다.`);
 
-    // README 내용도 가져오기 (rate limit을 피하기 위해 선택적으로)
+    // 저장소 내용 분석하여 간단한 요약 생성
     const reposWithDetails = await Promise.all(
-      repos.slice(0, 10).map(async (repo, index) => {
-        // rate limit을 피하기 위해 일부만 README 가져오기
-        let readme = null;
-        if (index < 5) {
-          try {
-            const readmeResponse = await fetch(`https://api.github.com/repos/${username}/${repo.name}/readme`, {
-              headers: {
-                'Accept': 'application/vnd.github.v3+json'
-              }
-            });
-            if (readmeResponse.ok) {
-              const readmeData = await readmeResponse.json();
-              try {
-                // Base64 디코딩 (한글 인코딩 문제 해결)
-                const base64Content = readmeData.content.replace(/\s/g, '');
-                const binaryString = atob(base64Content);
-                // UTF-8 바이트를 문자열로 변환
-                const bytes = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                  bytes[i] = binaryString.charCodeAt(i);
-                }
-                const decoded = new TextDecoder('utf-8').decode(bytes);
-
-                // Markdown 제거 및 텍스트만 추출
-                const textOnly = decoded
-                  .replace(/#{1,6}\s+/g, '') // 헤더 제거
-                  .replace(/\*\*([^*]+)\*\*/g, '$1') // 볼드 제거
-                  .replace(/\*([^*]+)\*/g, '$1') // 이탤릭 제거
-                  .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // 링크 제거
-                  .replace(/```[\s\S]*?```/g, '') // 코드 블록 제거
-                  .replace(/`([^`]+)`/g, '$1') // 인라인 코드 제거
-                  .replace(/!\[([^\]]*)\]\([^\)]+\)/g, '') // 이미지 제거
-                  .replace(/\n{3,}/g, '\n\n') // 여러 줄바꿈 정리
-                  .trim();
-                readme = textOnly.substring(0, 200); // 처음 200자만
-              } catch (decodeError) {
-                console.warn(`README 디코딩 실패: ${repo.name}`, decodeError);
-                readme = null;
-              }
+      repos.slice(0, 10).map(async (repo) => {
+        // 저장소 정보 기반으로 간단한 요약 생성
+        let summary = repo.description;
+        
+        // description이 없거나 너무 짧으면 저장소 정보로 요약 생성
+        if (!summary || summary.length < 10) {
+          const parts = [];
+          
+          // 언어 정보 추가
+          if (repo.language) {
+            parts.push(`${repo.language}로 작성된`);
+          }
+          
+          // topics 정보 활용
+          if (repo.topics && repo.topics.length > 0) {
+            const relevantTopics = repo.topics.filter(t => 
+              !['config', 'github-config', 'template', 'starter'].includes(t.toLowerCase())
+            );
+            if (relevantTopics.length > 0) {
+              parts.push(relevantTopics.slice(0, 2).join(', ') + ' 프로젝트');
             }
-          } catch (e) {
-            // README가 없으면 무시
-            console.log(`README를 가져올 수 없습니다: ${repo.name}`);
+          }
+          
+          // 저장소 이름으로 프로젝트 타입 추론
+          const nameLower = repo.name.toLowerCase();
+          if (nameLower.includes('robot') || nameLower.includes('mecha')) {
+            parts.push('로봇 관련');
+          } else if (nameLower.includes('ws') || nameLower.includes('workspace')) {
+            parts.push('워크스페이스');
+          } else if (nameLower.includes('driver')) {
+            parts.push('드라이버');
+          } else if (nameLower.includes('study') || nameLower.includes('learn')) {
+            parts.push('학습');
+          } else if (nameLower.includes('project')) {
+            parts.push('프로젝트');
+          }
+          
+          // 저장소 이름이 .github.io면 포트폴리오
+          if (nameLower.includes('.github.io')) {
+            summary = '개인 포트폴리오 웹사이트';
+          } else if (parts.length > 0) {
+            summary = parts.join(' ') + '입니다.';
+          } else {
+            summary = `${repo.language || '다양한 언어'}로 개발된 프로젝트입니다.`;
           }
         }
-
-        // 설명 정리: description이 없거나 너무 짧으면 README 사용
-        let finalDescription = repo.description;
         
-        // 깨진 텍스트 감지 (이상한 문자 패턴)
+        // 깨진 텍스트 감지 및 정리
         const isCorrupted = (text) => {
           if (!text || text.length < 5) return false;
-          // 깨진 한글 패턴 감지 (예: ì, í, ë 같은 문자)
           const corruptedPattern = /[ìíîïðñóôõöùúûüýþÿ]/;
-          // 깨진 텍스트 비율 확인 (이상한 문자가 너무 많으면 깨진 것으로 판단)
           const corruptedChars = text.match(/[ìíîïðñóôõöùúûüýþÿ]/g);
           if (corruptedChars && corruptedChars.length > text.length * 0.2) {
             return true;
@@ -88,35 +84,36 @@ export const fetchGitHubRepos = async (username = 'MOSW626') => {
           return corruptedPattern.test(text) && corruptedChars && corruptedChars.length > 3;
         };
         
-        // description이 없거나 깨져있으면 README 사용
-        if (!finalDescription || finalDescription.length < 10) {
-          if (readme && readme.length > 10 && !isCorrupted(readme)) {
-            finalDescription = readme;
+        // 깨진 텍스트면 재생성
+        if (isCorrupted(summary)) {
+          const parts = [];
+          if (repo.language) parts.push(`${repo.language} 프로젝트`);
+          if (repo.topics && repo.topics.length > 0) {
+            const relevantTopics = repo.topics.filter(t => 
+              !['config', 'github-config'].includes(t.toLowerCase())
+            );
+            if (relevantTopics.length > 0) {
+              parts.push(relevantTopics[0] + ' 관련');
+            }
           }
-        } else if (isCorrupted(finalDescription)) {
-          // description이 깨져있으면 README 시도
-          if (readme && readme.length > 10 && !isCorrupted(readme)) {
-            finalDescription = readme;
-          }
-          // README도 깨져있으면 원본 description 유지 (최소한 뭔가 보여줌)
+          summary = parts.length > 0 ? parts.join(' ') + '입니다.' : `${repo.language || '프로젝트'}입니다.`;
         }
         
-        // 최종적으로 설명이 없으면 기본 메시지
-        if (!finalDescription || finalDescription.length < 5) {
-          finalDescription = repo.description || '설명이 없습니다.';
+        // 최종 설명
+        if (!summary || summary.length < 5) {
+          summary = `${repo.language || '다양한 언어'}로 개발된 프로젝트입니다.`;
         }
 
         return {
           id: repo.id,
           title: repo.name,
-          description: finalDescription,
+          description: summary,
           github: repo.html_url,
           language: repo.language,
           stars: repo.stargazers_count,
           forks: repo.forks_count,
           updated: repo.updated_at,
-          topics: repo.topics || [],
-          readme: readme
+          topics: repo.topics || []
         };
       })
     );
